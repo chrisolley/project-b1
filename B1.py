@@ -2,8 +2,10 @@
 import numpy as np 
 import matplotlib.pyplot as plt
 import math
+from tqdm import tqdm
+from minimizer import minimise
 
-def fit(t,tau,s): 
+def fit(tau, t, s): 
 
 	'''
 	fit: Theoretical distribution for the measurements of decay lifetimes of subatomic particles
@@ -16,19 +18,20 @@ def fit(t,tau,s):
 	return (1./(2.*tau))*np.exp((s**2/(2*tau**2))-t/tau)*math.erfc((1./np.sqrt(2))*(s/tau-t/s))
 
 
-def nll(lifetime, uncertainty, tau):
+def nll(tau, lifetime, uncertainty):
 	'''
 	nll: Negative Log Likelihood, calculates the likelihood of an ensemble of PDFs.
 	Args:
 		tau: average lifetime.
+		lifetime: list of lifetime measurements.
+		uncertainty: list of uncertainties associated with lifetime measurements.
 	Returns: 
 		nll: negative log likelihood.
 	'''
 	prob_list = []
 
-	for (t,u) in zip(lifetime, uncertainty):
-		#prob = (1./(2*tau))*np.exp((u**2/(2*tau**2))-(t/tau))*math.erfc((1./np.sqrt(2))*(u/tau-t/u)) # calculate probability of each data point based on theoretical distribution
-		prob = fit(t,tau,u)
+	for (t,s) in zip(lifetime, uncertainty):
+		prob = fit(tau,t,s)
 		prob_list.append(np.log(prob))
 
 	nll = -sum(prob_list)
@@ -49,16 +52,21 @@ for line in f: # reading data
 N = len(lifetime) # number of data points
 
 
-t = np.linspace(0,10,1000)
+t = np.linspace(0.,10.,1000)
 g = []
-tau = np.linspace(0,5,100)
+tau = np.linspace(0.,5.,100)
 nll_list = []
 
-for a in t: 
-        g.append(fit(a,tau=1.,s=.05))
+for a in tqdm(t, total=len(t), desc='Fit function array filling...'): 
+        g.append(fit(tau=1.,t=a,s=.05))
 
-for a in tau: 
-	nll_list.append(nll(lifetime, uncertainty, a))
+for a in tqdm(tau, total=len(tau), desc='NLL array filling...'): 
+	nll_list.append(nll(tau=a, lifetime=lifetime, uncertainty=uncertainty))
+
+
+points_hist = minimise(nll, (0.1, 0.3, 1.0), 10**(-5), lifetime, uncertainty)
+#TODO what starting values does this work for, how to treat negative values that appear from the minimisation algorithm.
+print points_hist[-1]
 
 #Plotting
 
@@ -74,7 +82,7 @@ ax2.grid()
 
 fig3,ax3 = plt.subplots()
 ax3.plot(tau, nll_list)
+ax3.plot([elem[0] for elem in points_hist], [elem[1] for elem in points_hist], color='red', linestyle='', marker='.')
 ax3.grid()
-
 
 plt.show()
