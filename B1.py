@@ -66,7 +66,7 @@ for a in tqdm(tau, total=len(tau), desc='NLL array filling...'):
 
 points_hist = minimise(nll, (0.1, 0.3, 1.0), 10**(-5), lifetime, uncertainty)
 #TODO what starting values does this work for, how to treat negative values that appear from the minimisation algorithm.
-print points_hist[-1]
+print(points_hist[-1])
 
 #Plotting
 
