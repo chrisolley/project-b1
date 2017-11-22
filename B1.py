@@ -6,6 +6,8 @@ import math
 from tqdm import tqdm
 from minimizer import minimise
 
+plt.rc('text', usetex=True)
+plt.rc('font', family='sans serif')
 
 def fit(tau, t, s):
     '''
@@ -66,7 +68,7 @@ N = len(lifetime)  # number of data points
 
 t = np.linspace(0., 10., 1000)
 g = []
-tau = np.linspace(0., 5., 100)
+tau = np.linspace(10**(-5), 5., 100)
 nll_list = []
 
 for a in tqdm(t, total=len(t), desc='Fit function array filling...'):
@@ -76,8 +78,10 @@ for a in tqdm(tau, total=len(tau), desc='NLL array filling...'):
     nll_list.append(nll(tau=a, lifetime=lifetime, uncertainty=uncertainty))
 
 
-points_hist, points_initial = minimise(nll, (0.1, 0.3, 1.0), 10**(-5),
-                                       lifetime, uncertainty)
+min_val, points_hist, points_initial, s_lower, s_upper = minimise(nll, (0.1, 0.3, 1.0), 10**(-5), lifetime, uncertainty)
+
+print("NLL function is minimised (NLL = {}) for a value of tau = \
+      {}, s.d. + {} - {}".format(min_val[1], min_val[0], s_upper, s_lower))
 
 # e.g. (0.1, 2.0, 1.0) doesn't give min, (0.1, 0.3, 1.5) goes to
 # negative x values, (0.1, 0.3, 1.0) works.
@@ -88,24 +92,43 @@ points_hist, points_initial = minimise(nll, (0.1, 0.3, 1.0), 10**(-5),
 
 # Plotting
 
-# fig1, ax1 = plt.subplots()
-# ax1.hist(lifetime, bins=int(np.sqrt(N)))
-# ax1.set_xlim(0, 7)
-# ax1.grid()
-
-# fig2, ax2 = plt.subplots()
-# ax2.plot(t, g)
-# ax2.set_xlim(0, 7)
-# ax2.grid()
+#fig1, ax1 = plt.subplots()
+#ax1.hist(lifetime, bins=int(np.sqrt(N)))
+#ax1.set_xlim(0, 7)
+#ax1.grid()
+#
+#fig2, ax2 = plt.subplots()
+#ax2.plot(t, g)
+#ax2.set_xlim(0, 7)
+#ax2.grid()
 
 fig3, ax3 = plt.subplots()
 ax3.plot(tau, nll_list)
 ax3.plot([elem[0] for elem in points_hist],
          [elem[1] for elem in points_hist],
          color='red', linestyle='', marker='.')
+
 ax3.plot([elem[0] for elem in points_initial],
          [elem[1] for elem in points_initial],
          color='green', linestyle='', marker='.')
+ax3.set_ylabel("NLL")
+ax3.set_xlabel(r"$\tau$")
 ax3.grid()
 
+nll_list = []
+tau = np.linspace(min_val[0] - 2 * s_lower, min_val[0] + 2 * s_upper, 100)
+for a in tqdm(tau, total=len(tau), desc='NLL array filling to display S.D...'):
+    nll_list.append(nll(tau=a, lifetime=lifetime, uncertainty=uncertainty))
+
+fig4, ax4 = plt.subplots()
+ax4.plot(tau, nll_list)
+ax4.plot(min_val[0], min_val[1], color='red', linestyle='', marker='.')
+ax4.plot([min_val[0]+s_upper, min_val[0]-s_lower], 
+         [min_val[1]+0.5, min_val[1]+0.5] , color='blue', 
+         linestyle='', marker='.')
+ax4.set_xlim(min_val[0] - 2 * s_lower, min_val[0] + 2 * s_upper)
+ax4.set_ylim(min_val[1] - 1.5, min_val[1] + 1.5)
+ax4.set_ylabel("NLL")
+ax4.set_xlabel(r"$\tau$")
+ax4.grid()
 plt.show()

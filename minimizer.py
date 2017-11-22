@@ -27,6 +27,46 @@ def para_min(f, x, *args):
     return x_min
 
 
+def sd(f, min_val, *args):
+    '''
+    sd: Computes the standard deviation based on a given NLL function and its
+        minimum.
+    Args: 
+        f: NLL function.
+        min_val: Minimum.
+    Returns: 
+        (s_upper, s_lower)
+    '''
+    # choose a step size relative to the\scale of the function around the min
+    step_size = 10**(-4)*min_val[0]
+    
+    # calculate upper sd
+    print("\n")
+    n=1
+    diff = f(min_val[0] + n * step_size, *args)-min_val[1]
+
+    while (diff<0.5): 
+        print("\r Upper sd loop {}".format(n), end="")
+        n += 1
+        diff = f(min_val[0] + n * step_size, *args)-min_val[1]
+    
+    s_upper = n*step_size
+    
+    # calculate lower sd
+    print("\n")
+    n=1
+    diff = f(min_val[0] - n * step_size, *args)-min_val[1]
+
+    while (diff<0.5): 
+        print("\r Lower sd loop {}".format(n), end="")
+        n += 1
+        diff = f(min_val[0] - n * step_size, *args)-min_val[1]
+    
+    s_lower = n*step_size
+    print ("\n")
+    
+    return s_lower, s_upper
+
 def minimise(f, start_points, epsilon, *args):
     '''
     minimise: Minimises a function using parabolic minimisation algorithm.
@@ -47,42 +87,35 @@ def minimise(f, start_points, epsilon, *args):
         point_update = (x_update, f(x_update, *args))
         points.append(point_update)
         points_hist.append(point_update)
-        print(points)
         points.sort(key=lambda tup: tup[1])
-        print(points)
         points.pop()
 
     conv = abs((points_hist[-1][0] -
                 points_hist[-2][0]) / points_hist[-2][0])
 
     i = 1
+    print ("\n")
     while (conv > epsilon):
-        print("Parabolic minimisation loop {}".format(i)) 
+        print("\r Parabolic minimisation loop {}".format(i), end="") 
         x_update = para_min(f, [elem[0] for elem in points], *args)
         point_update = (x_update, f(x_update, *args))
         points.append(point_update)
         points_hist.append(point_update)
-        print(points)
         points.sort(key=lambda tup: tup[1])
-        print(points)
         points.pop()
         conv = abs((points_hist[-1][0] -
                     points_hist[-2][0]) / points_hist[-2][0])
         i += 1
+    
+    min_val = points_hist[-1]
+    
+    s_lower, s_upper = sd(f, min_val, *args)
+    
+    return min_val, points_hist, points_initial, s_lower, s_upper
 
-    return points_hist, points_initial
+
 
 
 def f(x, a, b):
 
     return a * np.cosh(x) + b
-
-# points_hist = minimise(f,(-5, 7, 10),0.01,2,2)
-# print [elem[0] for elem in points_hist]
-# print [elem[1] for elem in points_hist]
-# x = np.linspace(-5,5,100)
-# plt.plot(x, f(x, 2, 2), color='blue', linestyle='-')
-# plt.plot([elem[0] for elem in points_hist], 
-# [elem[1] for elem in points_hist], color='red', linestyle='', marker='.')
-# plt.grid()
-# plt.show()
