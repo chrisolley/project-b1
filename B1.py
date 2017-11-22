@@ -79,12 +79,18 @@ for a in tqdm(tau, total=len(tau), desc='NLL array filling...'):
 points_hist, points_initial = minimise(nll, (0.1, 2.0, 1.0), 10**(-5),
                                        lifetime, uncertainty)
 
+<<<<<<< HEAD
 # e.g. (0.1, 2.0, 1.0) doesn't give min, (0.1, 0.3, 1.5) goes to
 # negative x values, (0.1, 0.3, 1.0) works.
 # TODO what starting values does this work for,
 # how to treat negative values that appear from the minimisation algorithm.
 # ANSWER need to select points that are along an interval of positive curvature. 
 # could use an interpolation algorithm first to determine roughly where the minimum is.
+=======
+points_hist = minimise(nll, (0.1, 0.3, 1.0), 10**(-5), lifetime, uncertainty)
+#TODO what starting values does this work for, how to treat negative values that appear from the minimisation algorithm.
+print(points_hist[-1])
+>>>>>>> 3c2d949cbf0186770f584d6c4e330f96c633d19b
 
 # Plotting
 
