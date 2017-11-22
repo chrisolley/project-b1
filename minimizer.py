@@ -38,8 +38,8 @@ def minimise(f, start_points, epsilon, *args):
     '''
     # print f(start_points, *args)
     # creates a tuple of points based on the starting x values
-    points_initial = zip(start_points, [f(p, *args) for p in start_points])
-    points = zip(start_points, [f(p, *args) for p in start_points])
+    points_initial = list(zip(start_points, [f(p, *args) for p in start_points]))
+    points = list(zip(start_points, [f(p, *args) for p in start_points]))
     points_hist = []  # initialise array to hold past points
 
     for i in range(2):  # runs the algorithm twice
@@ -47,9 +47,9 @@ def minimise(f, start_points, epsilon, *args):
         point_update = (x_update, f(x_update, *args))
         points.append(point_update)
         points_hist.append(point_update)
-        print points
+        print(points)
         points.sort(key=lambda tup: tup[1])
-        print points
+        print(points)
         points.pop()
 
     conv = abs((points_hist[-1][0] -
@@ -57,14 +57,14 @@ def minimise(f, start_points, epsilon, *args):
 
     i = 1
     while (conv > epsilon):
-        print 'Parabolic minimisation loop {}'.format(i)
+        print("Parabolic minimisation loop {}".format(i)) 
         x_update = para_min(f, [elem[0] for elem in points], *args)
         point_update = (x_update, f(x_update, *args))
         points.append(point_update)
         points_hist.append(point_update)
-        print points
+        print(points)
         points.sort(key=lambda tup: tup[1])
-        print points
+        print(points)
         points.pop()
         conv = abs((points_hist[-1][0] -
                     points_hist[-2][0]) / points_hist[-2][0])
