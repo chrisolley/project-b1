@@ -76,7 +76,7 @@ for a in tqdm(tau, total=len(tau), desc='NLL array filling...'):
     nll_list.append(nll(tau=a, lifetime=lifetime, uncertainty=uncertainty))
 
 
-points_hist, points_initial = minimise(nll, (0.1, 2.0, 1.0), 10**(-5),
+points_hist, points_initial = minimise(nll, (0.1, 0.3, 1.0), 10**(-5),
                                        lifetime, uncertainty)
 
 # e.g. (0.1, 2.0, 1.0) doesn't give min, (0.1, 0.3, 1.5) goes to
