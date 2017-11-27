@@ -27,10 +27,10 @@ def para_min(f, x, *args):
     return x_min
 
 
-def sd(f, min_val, *args):
+def sd_1(f, min_val, *args):
     '''
-    sd: Computes the standard deviation based on a given NLL function and its
-        minimum.
+    sd_1: Computes the standard deviation based on a given NLL function and its
+        minimum, by varying the NLL function by 1/2.
     Args: 
         f: NLL function.
         min_val: Minimum.
@@ -43,29 +43,43 @@ def sd(f, min_val, *args):
     # calculate upper sd
     print("\n")
     n=1
-    diff = f(min_val[0] + n * step_size, *args)-min_val[1]
+    diff = f(min_val[0] + n * step_size, *args) - min_val[1]
 
     while (diff<0.5): 
         print("\r Upper sd loop {}".format(n), end="")
         n += 1
-        diff = f(min_val[0] + n * step_size, *args)-min_val[1]
+        diff = f(min_val[0] + n * step_size, *args) - min_val[1]
     
     s_upper = n*step_size
     
     # calculate lower sd
     print("\n")
     n=1
-    diff = f(min_val[0] - n * step_size, *args)-min_val[1]
+    diff = f(min_val[0] - n * step_size, *args) - min_val[1]
 
     while (diff<0.5): 
         print("\r Lower sd loop {}".format(n), end="")
         n += 1
-        diff = f(min_val[0] - n * step_size, *args)-min_val[1]
+        diff = f(min_val[0] - n * step_size, *args) - min_val[1]
     
-    s_lower = n*step_size
+    s_lower = n * step_size
     print ("\n")
     
     return s_lower, s_upper
+
+def sd_2(p):
+    '''
+    sd_2: Computes the standard deviation based on the curvature of the
+    parabolic approximation of a NLL function. 
+    '''
+    
+    curv = ((2 * p[0][1]) / ((p[0][0] - p[1][0]) * (p[0][0] - p[2][0])) +
+            (2 * p[1][1]) / ((p[1][0] - p[0][0]) * (p[1][0] - p[2][0])) +
+            (2 * p[2][1]) / ((p[2][0] - p[0][0]) * (p[2][0] - p[1][0])))
+           
+    s = 1 / curv
+    
+    return s
 
 def minimise(f, start_points, epsilon, *args):
     '''
@@ -109,9 +123,10 @@ def minimise(f, start_points, epsilon, *args):
     
     min_val = points_hist[-1]
     
-    s_lower, s_upper = sd(f, min_val, *args)
+    s_lower1, s_upper1 = sd_1(f, min_val, *args)
+    s_2 = sd_2(points)
     
-    return min_val, points_hist, points_initial, s_lower, s_upper
+    return min_val, points_hist, points_initial, s_lower1, s_upper1, s_2
 
 
 

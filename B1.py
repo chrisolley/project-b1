@@ -6,8 +6,8 @@ import math
 from tqdm import tqdm
 from minimizer import minimise
 
-plt.rc('text', usetex=True)
-plt.rc('font', family='sans serif')
+#plt.rc('text', usetex=True)
+#plt.rc('font', family='sans serif')
 
 def fit(tau, t, s):
     '''
@@ -78,10 +78,11 @@ for a in tqdm(tau, total=len(tau), desc='NLL array filling...'):
     nll_list.append(nll(tau=a, lifetime=lifetime, uncertainty=uncertainty))
 
 
-min_val, points_hist, points_initial, s_lower, s_upper = minimise(nll, (0.1, 0.3, 1.0), 10**(-5), lifetime, uncertainty)
+min_val, points_hist, points_initial, s_lower1, s_upper1, s_2 = minimise(nll, (0.1, 0.3, 1.0), 10**(-5), lifetime, uncertainty)
 
 print("NLL function is minimised (NLL = {}) for a value of tau = \
-      {}, s.d. + {} - {}".format(min_val[1], min_val[0], s_upper, s_lower))
+      {}, s.d. + {} - {} (Method 1), sd = +/- {} (Method 2)".format(
+      min_val[1], min_val[0], s_upper1, s_lower1, s_2))
 
 # e.g. (0.1, 2.0, 1.0) doesn't give min, (0.1, 0.3, 1.5) goes to
 # negative x values, (0.1, 0.3, 1.0) works.
@@ -112,23 +113,26 @@ ax3.plot([elem[0] for elem in points_initial],
          [elem[1] for elem in points_initial],
          color='green', linestyle='', marker='.')
 ax3.set_ylabel("NLL")
-ax3.set_xlabel(r"$\tau$")
+ax3.set_xlabel("tau")
 ax3.grid()
 
 nll_list = []
-tau = np.linspace(min_val[0] - 2 * s_lower, min_val[0] + 2 * s_upper, 100)
+tau = np.linspace(min_val[0] - 2 * s_lower1, min_val[0] + 2 * s_upper1, 100)
 for a in tqdm(tau, total=len(tau), desc='NLL array filling to display S.D...'):
     nll_list.append(nll(tau=a, lifetime=lifetime, uncertainty=uncertainty))
 
 fig4, ax4 = plt.subplots()
 ax4.plot(tau, nll_list)
-ax4.plot(min_val[0], min_val[1], color='red', linestyle='', marker='.')
-ax4.plot([min_val[0]+s_upper, min_val[0]-s_lower], 
+ax4.plot(min_val[0], min_val[1], color='red', linestyle='', marker='.', 
+         label="Minimum")
+ax4.plot([min_val[0]+s_upper1, min_val[0]-s_lower1], 
          [min_val[1]+0.5, min_val[1]+0.5] , color='blue', 
-         linestyle='', marker='.')
-ax4.set_xlim(min_val[0] - 2 * s_lower, min_val[0] + 2 * s_upper)
+         linestyle='', marker='.', label='S.D.')
+ax4.set_xlim(min_val[0] - 2 * s_lower1, min_val[0] + 2 * s_upper1)
 ax4.set_ylim(min_val[1] - 1.5, min_val[1] + 1.5)
 ax4.set_ylabel("NLL")
-ax4.set_xlabel(r"$\tau$")
+ax4.set_xlabel("tau")
+ax4.set_title("S.D. estimated by method 1")
+ax4.legend(loc="best")
 ax4.grid()
 plt.show()
