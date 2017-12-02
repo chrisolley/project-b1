@@ -27,59 +27,78 @@ def min(f, x, *args):
     return x_min
 
 
+def quad_poly(x, data):
+    '''
+    quad_poly: Computes the 2nd order lagrange polynomial
+               based on 3 data points.
+    Args:
+        x: evaluation point for the polynomial.
+        data: tuple of 3 data points in (x,y) form.
+
+    Returns:
+        f: lagrange polynomial evaluated at x.
+    '''
+    f = data[0][1] * ((x - data[1][0]) * (x - data[2][0])) / ((data[0][0] - data[1][0]) * (data[0][0] - data[2][0])) + data[1][1] * ((x - data[0][0]) * (x - data[2][0])) / ((data[1][0] - data[0][0]) * (data[1][0] - data[2][0])) + data[2][1] * ((x - data[0][0]) * (x - data[1][0])) / ((data[2][0] - data[0][0]) * (data[2][0] - data[1][0]))
+
+    return f
+
+
 def sd_1(f, min_val, *args):
     '''
     sd_1: Computes the standard deviation based on a given NLL function and its
         minimum, by varying the NLL function by 1/2.
-    Args: 
+    Args:
         f: NLL function.
         min_val: Minimum.
-    Returns: 
+    Returns:
         (s_upper, s_lower)
     '''
     # choose a step size relative to the\scale of the function around the min
-    step_size = 10**(-4)*min_val[0]
-    
+    step_size = 10**(-3) * min_val[0]
+
     # calculate upper sd
     print("\n")
-    n=1
+    n = 1
     diff = f(min_val[0] + n * step_size, *args) - min_val[1]
 
-    while (diff<0.5): 
-        print("\r Upper sd loop {}".format(n), end="")
+    while (diff < 0.5):
+        #print("\r Upper sd loop {}".format(n), end="")
         n += 1
         diff = f(min_val[0] + n * step_size, *args) - min_val[1]
-    
-    s_upper = n*step_size
-    
+
+    s_upper = n * step_size
+
     # calculate lower sd
     print("\n")
-    n=1
+    n = 1
     diff = f(min_val[0] - n * step_size, *args) - min_val[1]
 
-    while (diff<0.5): 
-        print("\r Lower sd loop {}".format(n), end="")
+    while (diff < 0.5): 
+        #print("\r Lower sd loop {}".format(n), end="")
         n += 1
         diff = f(min_val[0] - n * step_size, *args) - min_val[1]
-    
+
     s_lower = n * step_size
     print ("\n")
-    
+
     return s_lower, s_upper
 
+
 def sd_2(p):
+
     '''
     sd_2: Computes the standard deviation based on the curvature of the
     parabolic approximation of a NLL function. 
     '''
-    
-    curv = ((2 * p[0][1]) / ((p[0][0] - p[1][0]) * (p[0][0] - p[2][0])) +
-            (2 * p[1][1]) / ((p[1][0] - p[0][0]) * (p[1][0] - p[2][0])) +
-            (2 * p[2][1]) / ((p[2][0] - p[0][0]) * (p[2][0] - p[1][0])))
-           
-    s = 1 / curv
-    
+
+    curv = ((p[0][1]) / ((p[0][0] - p[1][0]) * (p[0][0] - p[2][0])) +
+            (p[1][1]) / ((p[1][0] - p[0][0]) * (p[1][0] - p[2][0])) +
+            (p[2][1]) / ((p[2][0] - p[0][0]) * (p[2][0] - p[1][0])))
+    print "Curvature = ", curv
+    s = np.sqrt(1 / curv)
+
     return s
+
 
 def para_min(f, start_points, epsilon, *args):
     '''
@@ -110,13 +129,13 @@ def para_min(f, start_points, epsilon, *args):
     i = 1
     print ("\n")
     while (conv > epsilon):
-        print("\r Parabolic minimisation loop {}".format(i), end="") 
+        #print("\r Parabolic minimisation loop {}".format(i), end="") 
         x_update = min(f, [elem[0] for elem in points], *args)
         point_update = (x_update, f(x_update, *args))
         points.append(point_update)
         points_hist.append(point_update)
-        points.sort(key=lambda tup: tup[1])
-        points.pop()
+        points.sort(key=lambda tup: tup[1]) # sorts in ascending order
+        points.pop() # removes highest point
         conv = abs((points_hist[-1][0] -
                     points_hist[-2][0]) / points_hist[-2][0])
         i += 1
@@ -126,7 +145,7 @@ def para_min(f, start_points, epsilon, *args):
     s_lower1, s_upper1 = sd_1(f, min_val, *args)
     s_2 = sd_2(points)
     
-    return min_val, points_hist, points_initial, s_lower1, s_upper1, s_2
+    return min_val, points_hist, points_initial, s_lower1, s_upper1, s_2, points
 
 
 
@@ -134,3 +153,15 @@ def para_min(f, start_points, epsilon, *args):
 def f(x, a, b):
 
     return a * np.cosh(x) + b
+
+
+if __name__ == "__main__":
+
+    points = ((-7, 1), (4, 5), (-2, 8))
+    x = np.linspace(-10, 10, 100)
+    y = [quad_poly(a, points) for a in x]
+    plt.plot(points[0][0], points[0][1], color='red', linestyle='', marker='.')
+    plt.plot(points[1][0], points[1][1], color='red', linestyle='', marker='.')
+    plt.plot(points[2][0], points[2][1], color='red', linestyle='', marker='.')
+    plt.plot(x, y)
+    plt.show()

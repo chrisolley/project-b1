@@ -2,7 +2,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from tqdm import tqdm
-from min_1d import para_min
+from min_1d import para_min, quad_poly
 from b1 import nll, fit
 
 f = open('lifetime.txt')  # measured lifetimes and uncertainty data
@@ -34,7 +34,7 @@ for a in tqdm(tau, total=len(tau), desc='NLL array filling...'):
 nll_minimisation = para_min(nll, (0.1, 0.3, 1.0), 10**(-5), lifetime, uncertainty)
 
 # unpack tuple of minimisation results
-min_val, points_hist, points_initial, s_lower1, s_upper1, s_2 = nll_minimisation
+min_val, points_hist, points_initial, s_lower1, s_upper1, s_2, points = nll_minimisation
 
 # create range for tau estimate standard deviation plotting
 tau_sd = np.linspace(min_val[0] - 2 * s_lower1, min_val[0] + 2 * s_upper1, 100)
@@ -43,7 +43,7 @@ tau_sd = np.linspace(min_val[0] - 2 * s_lower1, min_val[0] + 2 * s_upper1, 100)
 for a in tqdm(tau_sd, total=len(tau_sd), desc='NLL array filling to display S.D...'):
     nll_sd_list.append(nll(tau=a, lifetime=lifetime, uncertainty=uncertainty))
 
-# display results of minimisation 
+# display results of minimisation
 print("NLL function is minimised (NLL = {}) for a value of tau = \
       {}, s.d. + {} - {} (Method 1), sd = +/- {} (Method 2)".format(
       min_val[1], min_val[0], s_upper1, s_lower1, s_2))
@@ -70,6 +70,7 @@ ax3.plot([elem[0] for elem in points_hist],
 ax3.plot([elem[0] for elem in points_initial],
          [elem[1] for elem in points_initial],
          color='green', linestyle='', marker='.')
+
 ax3.set_ylabel("NLL")
 ax3.set_xlabel("tau")
 ax3.grid()
@@ -82,6 +83,12 @@ ax4.plot(min_val[0], min_val[1], color='red', linestyle='', marker='.',
 ax4.plot([min_val[0]+s_upper1, min_val[0]-s_lower1], 
          [min_val[1]+0.5, min_val[1]+0.5] , color='blue', 
          linestyle='', marker='.', label='S.D.')
+ax4.plot([elem[0] for elem in points],
+         [elem[1] for elem in points],
+         color='red', linestyle='', marker='.', label='Final points')
+y = [quad_poly(a, points) for a in tau_sd]
+ax4.plot(tau_sd, y, label='Quadratic fit')
+
 ax4.set_xlim(min_val[0] - 2 * s_lower1, min_val[0] + 2 * s_upper1)
 ax4.set_ylim(min_val[1] - 1.5, min_val[1] + 1.5)
 ax4.set_ylabel("NLL")
