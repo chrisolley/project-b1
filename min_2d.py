@@ -2,6 +2,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import cm
+from helper import dot, lu
 
 def grad_fds(f, x, *args):
     '''
@@ -37,7 +38,12 @@ def grad_bds(f, x, *args):
     dfdx = (f(x[0], x[1]) - f(x[0] - h, x[1]))/h
     dfdy = (f(x[0], x[1]) - f(x[0], x[1] - h))/h
     
-    return (dfdx, dfdy)
+    #return (dfdx, dfdy)
+    grad = np.zeros((2,1))
+    grad[0,0] = dfdx
+    grad[1,0] = dfdy
+    
+    return grad
 
 def grad_cds(f, x, *args):
     '''
@@ -55,12 +61,42 @@ def grad_cds(f, x, *args):
     dfdx = (f(x[0] + h, x[1]) - f(x[0] - h, x[1]))/(2 * h)
     dfdy = (f(x[0], x[1] + h) - f(x[0], x[1] - h))/(2 * h)
     
-    return (dfdx, dfdy)
+    #return (dfdx, dfdy)
+    grad = np.zeros((2,1))
+    grad[0,0] = dfdx
+    grad[1,0] = dfdy
+    
+    return grad
+
+def hessian(f, x, *args):
+    '''
+    hessian: Finds the hessian of a 2d function using a finite difference scheme. 
+    Args: 
+        f: function to take gradient of. 
+        x: point to evaluate at. 
+        *args: function arguments.  
+    Returns: 
+        hess: hessian in np.array form. 
+	'''
+    
+    hess = np.zeros((2,2))
+    h = 10**(-5)
+    dfdxx = (f(x[0] + h, x[1]) - 2 * f(x[0], x[1]) + f(x[0] + h, x[1]))/(h**2)
+    dfdyy = (f(x[0], x[1] + h) - 2 * f(x[0], x[1]) + f(x[0], x[1] + h))/(h**2)
+    dfdxy = (f(x[0] + h, x[1] + h) - f(x[0] + h, x[1] - h) - 
+				f(x[0] - h, x[1] + h) + f(x[0] - h, x[1] - h)) / (4 * h**2) 
+	
+    hess[0,0] = dfdxx
+    hess[0,1] = dfdxy
+    hess[1,0] = dfdxy
+    hess[1,1] = dfdyy
+   
+    return hess
 
 def grad_min(f, x, a, *args):
     '''
     grad_min: Minimises a 2d function using the gradient method. 
-    Args: 
+    Args:
         f: function to be minimized. 
         x: starting point. 
         a: step size. 
@@ -73,7 +109,7 @@ def grad_min(f, x, a, *args):
     '''
     x_hist = []
     grad = grad_cds(f, x, *args)
-    x_update = tuple(p-a*q for p,q in zip(x, grad))
+    x_update = tuple(p - a * q for p, q in zip(x, grad))
     x_hist.append(x)
     x_hist.append(x_update)
     conv = (f(x_update[0], x_update[1], *args)
@@ -93,6 +129,57 @@ def grad_min(f, x, a, *args):
     
     return x_hist, x_min, f_min
 
+def newton_min(f, x, *args):
+    '''
+    newton_min: Minimises a 2d function using Newton's method. 
+    Args: 
+        f: function to be minimized. 
+        x: starting point. 
+        a: step size. 
+        *args: function arguments. 
+    Returns: 
+        x_hist: record of points. 
+        x_min: minimum coordinate.
+        f_min: minimum value of function.
+    '''
+    
+    x_hist = []
+    grad = grad_cds(f, x, *args)
+    hess = hessian(f, x, *args)
+    inv_hess = lu(hess, np.identity(hess.shape[0]))[2]
+    x_hist.append(x)
+    d = dot(inv_hess,grad)
+    delta = (d[0,0], d[1,0])
+    x_update = tuple(p - a for p, a in zip(x, delta))
+    print(x)
+    print(x_update)
+    x_hist.append(x_update)
+    conv = (f(x_update[0], x_update[1], *args)
+            - f(x[0], x[1], *args)) / f(x[0], x[1], *args)
+    x = x_update
+    
+    while (abs(conv) > 10**(-6)):
+        grad = grad_cds(f, x, *args)
+        hess = hessian(f, x, *args)
+        inv_hess = lu(hess, np.identity(hess.shape[0]))[2]
+        x_hist.append(x)
+        print(x)
+        d = dot(inv_hess,grad)
+        delta = (d[0,0], d[1,0])
+        x_update = tuple(p - a for p, a in zip(x, delta))
+        x_hist.append(x_update)
+        conv = (f(x_update[0], x_update[1], *args)
+                - f(x[0], x[1], *args)) / f(x[0], x[1], *args)
+        x = x_update
+
+    x_min = x_hist[-1]
+    f_min = f(x_min[0], x_min[1], *args)
+    
+    return x_hist, x_min, f_min
+    
+	
+
+
 def test(x, y):
     
     #return x**2 + y**2
@@ -100,9 +187,10 @@ def test(x, y):
 
 if __name__ == "__main__":
 
-    sol = grad_min(test, (3., 1.6), .5)
-    
+    #sol = grad_min(test, (3., 1.6), .5)
+    sol = newton_min(test, (2., 1.6))
     x_hist = sol[0]
+    print(x_hist)
     
     x = np.linspace(0, 2. * np.pi, 100)
     y = np.linspace(0, 2. * np.pi, 100)

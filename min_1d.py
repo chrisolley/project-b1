@@ -62,7 +62,7 @@ def sd_1(f, min_val, *args):
     diff = f(min_val[0] + n * step_size, *args) - min_val[1]
 
     while (diff < 0.5):
-        #print("\r Upper sd loop {}".format(n), end="")
+        print("\r Upper sd loop {}".format(n), end="")
         n += 1
         diff = f(min_val[0] + n * step_size, *args) - min_val[1]
 
@@ -74,7 +74,7 @@ def sd_1(f, min_val, *args):
     diff = f(min_val[0] - n * step_size, *args) - min_val[1]
 
     while (diff < 0.5): 
-        #print("\r Lower sd loop {}".format(n), end="")
+        print("\r Lower sd loop {}".format(n), end="")
         n += 1
         diff = f(min_val[0] - n * step_size, *args) - min_val[1]
 
@@ -90,11 +90,11 @@ def sd_2(p):
     sd_2: Computes the standard deviation based on the curvature of the
     parabolic approximation of a NLL function. 
     '''
-
-    curv = ((p[0][1]) / ((p[0][0] - p[1][0]) * (p[0][0] - p[2][0])) +
-            (p[1][1]) / ((p[1][0] - p[0][0]) * (p[1][0] - p[2][0])) +
-            (p[2][1]) / ((p[2][0] - p[0][0]) * (p[2][0] - p[1][0])))
-    print "Curvature = ", curv
+	
+    curv = 2 * ((p[0][1]) / ((p[0][0] - p[1][0]) * (p[0][0] - p[2][0])) +
+					 (p[1][1]) / ((p[1][0] - p[0][0]) * (p[1][0] - p[2][0])) +
+					 (p[2][1]) / ((p[2][0] - p[0][0]) * (p[2][0] - p[1][0])))
+    
     s = np.sqrt(1 / curv)
 
     return s
@@ -129,7 +129,7 @@ def para_min(f, start_points, epsilon, *args):
     i = 1
     print ("\n")
     while (conv > epsilon):
-        #print("\r Parabolic minimisation loop {}".format(i), end="") 
+        print("\r Parabolic minimisation loop {}".format(i), end="") 
         x_update = min(f, [elem[0] for elem in points], *args)
         point_update = (x_update, f(x_update, *args))
         points.append(point_update)
