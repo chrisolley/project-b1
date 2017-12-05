@@ -22,7 +22,17 @@ def fit(tau, t, s):
    '''
 
     f = (1. / (2. * tau)) * np.exp((s**2 / (2 * tau**2)) - t / tau) * \
-    math.erfc((1. / np.sqrt(2)) * (s / tau - t / s))
+        math.erfc((1. / np.sqrt(2)) * (s / tau - t / s))
+       
+    return f
+
+def fit_back(tau, t, s):
+    '''
+    fit_back:
+        
+    '''
+    
+    f = (s * np.sqrt(2 * np.pi))**(-1) * np.exp(-.5 * (t**2 / s**2))
        
     return f
 
@@ -48,4 +58,20 @@ def nll(tau, lifetime, uncertainty):
 
     nll = -sum(prob_list)
 
+    return nll
+
+def nll_2d(tau, a, lifetime, uncertainty):
+    '''
+    nll_2d: 
+        
+    '''
+    
+    prob_list = []
+    
+    for (t,s) in zip(lifetime, uncertainty):
+        prob = a * fit(tau, t, s) + (1 - a) * fit_back(tau, t, s)
+        prob_list.append(np.log(prob))
+        
+    nll = -sum(prob_list)
+    
     return nll
