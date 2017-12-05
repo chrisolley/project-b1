@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
 # !python3
 import numpy as np
-import matplotlib.pyplot as plt
 import math
-
-
+ 
+ 
 #plt.rc('text', usetex=True)
 #plt.rc('font', family='sans serif')
-
+ 
 def fit(tau, t, s):
     '''
     fit: Theoretical distribution for the measurements of decay lifetimes
@@ -20,11 +19,11 @@ def fit(tau, t, s):
     Returns:
         f: value of lifetime distribution at a point t
         for a given mean lifetime and measurement error.
-    '''
+   '''
 
     f = (1. / (2. * tau)) * np.exp((s**2 / (2 * tau**2)) - t / tau) * \
-        math.erfc((1. / np.sqrt(2)) * (s / tau - t / s))
-
+    math.erfc((1. / np.sqrt(2)) * (s / tau - t / s))
+       
     return f
 
 
