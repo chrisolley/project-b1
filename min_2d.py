@@ -84,7 +84,7 @@ def hessian(f, x, *args):
     dfdxx = (f(x[0] + h, x[1]) - 2 * f(x[0], x[1]) + f(x[0] + h, x[1]))/(h**2)
     dfdyy = (f(x[0], x[1] + h) - 2 * f(x[0], x[1]) + f(x[0], x[1] + h))/(h**2)
     dfdxy = (f(x[0] + h, x[1] + h) - f(x[0] + h, x[1] - h) - 
-				f(x[0] - h, x[1] + h) + f(x[0] - h, x[1] - h)) / (4 * h**2) 
+             f(x[0] - h, x[1] + h) + f(x[0] - h, x[1] - h)) / (4 * h**2) 
 	
     hess[0,0] = dfdxx
     hess[0,1] = dfdxy
@@ -154,14 +154,14 @@ def newton_min(f, x, *args):
     print(x)
     print(x_update)
     x_hist.append(x_update)
-    conv = (f(x_update[0], x_update[1], *args)
-            - f(x[0], x[1], *args)) / f(x[0], x[1], *args)
+    conv = (f(x_update[0], x_update[1], *args)- 
+            f(x[0], x[1], *args)) / f(x[0], x[1], *args)
     x = x_update
     
-    while (abs(conv) > 10**(-6)):
+    while (abs(conv) > 10**(-5)):
         grad = grad_cds(f, x, *args)
         hess = hessian(f, x, *args)
-        inv_hess = lu(hess, np.identity(hess.shape[0]))[2]
+        inv_hess = lu(hess, np.identity((2,2)))[2]
         x_hist.append(x)
         print(x)
         d = dot(inv_hess,grad)
@@ -177,33 +177,35 @@ def newton_min(f, x, *args):
     
     return x_hist, x_min, f_min
     
-	
-
 
 def test(x, y):
     
-    #return x**2 + y**2
-    return np.sin(x) + np.sin(y)
+    return x**2 + y**2
+    #return np.sin(x) + np.sin(y)
+    #return np.cosh(x) + np.cosh(y)
+
 
 if __name__ == "__main__":
 
     #sol = grad_min(test, (3., 1.6), .5)
-    sol = newton_min(test, (2., 1.6))
-    x_hist = sol[0]
-    print(x_hist)
-    
-    x = np.linspace(0, 2. * np.pi, 100)
-    y = np.linspace(0, 2. * np.pi, 100)
-    Z = np.zeros((100, 100))
-    
-    for i, a in enumerate(x): 
-        for j, b in enumerate(y): 
-            Z[j, i] = test(a,b)
-    
-    X, Y = np.meshgrid(x,y)
-    
-    fig, ax = plt.subplots()
-    contour = ax.contour(X, Y, Z)#, cmap=cm.viridis) 
-    fig.colorbar(contour)
-    ax.plot([a[0] for a in x_hist], [a[1] for a in x_hist], color='red', linestyle='', marker='.')
-    plt.show()
+#    sol = newton_min(test, (2., 1.6))
+#    x_hist = sol[0]
+#    print(x_hist)
+#    
+#    x = np.linspace(-2., 2., 100)
+#    y = np.linspace(-2., 2., 100)
+#    Z = np.zeros((100, 100))
+#    
+#    for i, a in enumerate(x): 
+#        for j, b in enumerate(y): 
+#            Z[j, i] = test(a,b)
+#    
+#    X, Y = np.meshgrid(x,y)
+#    
+#    fig, ax = plt.subplots()
+#    contour = ax.contour(X, Y, Z)#, cmap=cm.viridis)
+#    fig.colorbar(contour)
+#    ax.plot([a[0] for a in x_hist], [a[1] for a in x_hist], color='red', linestyle='', marker='.')
+#    plt.show()
+
+    print(hessian(test, (1,1)))
