@@ -15,7 +15,7 @@ for line in f:  # reading data line by line
     uncertainty.append(float(data[1]))
 
 N = len(lifetime)  # number of data points
-grid_points = 20
+grid_points = 100
 tau = np.linspace(10**(-5), 5., grid_points) # range for nll function
 a = np.linspace(10**(-5), 1., grid_points)
 nll_matrix = np.zeros((grid_points, grid_points)) # initialise array for nll function plotting
