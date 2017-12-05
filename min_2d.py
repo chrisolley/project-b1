@@ -135,7 +135,9 @@ def grad_min(f, x, a, *args):
     grad = grad_cds(f, x, *args) # calculate gradient
     x_update = x-a*grad # calcuate x_(n+1)
     x_hist.append((x[0,0], x[1,0])) # converts back to tuple for more readable form
-    x_hist.append((x_update[0,0], x[1,0]))
+    print((x[0,0], x[1,0]))
+    x_hist.append((x_update[0,0], x_update[1,0]))
+    print((x_update[0,0], x_update[1,0]))
     conv = convergence(f, x, x_update, *args) # determine convergence criteria
     x = x_update
     
@@ -143,6 +145,7 @@ def grad_min(f, x, a, *args):
         grad = grad_cds(f, x, *args)
         x_update = x-a*grad
         x_hist.append((x_update[0,0], x[1,0])) #convert back to tuple for more readable form
+        print((x_update[0,0], x_update[1,0]))
         conv = convergence(f, x, x_update, *args) # determine convergence criteria
         x = x_update
 
@@ -202,8 +205,8 @@ def test(x, y):
 
 if __name__ == "__main__":
 
-    sol1 = grad_min(test, (-12., 1.5), 0.1)
-    sol2 = newton_min(test, (-12., 1.5))
+    sol1 = grad_min(test, (-3., 1.5), 0.1)
+    sol2 = newton_min(test, (-3., 1.5))
     x_hist1 = sol1[0]
     print(x_hist1)
     x_hist2 = sol2[0]
