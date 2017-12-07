@@ -80,7 +80,7 @@ def grad_cds(f, x, *args):
 		
 	'''
 	grad = np.zeros((2,1)) # empty array for gradient
-	h = 10**(-5)
+	h = 10**(-3)
 	x = (x[0,0], x[1,0]) # converts input np.array to a tuple to simplify code
 	dfdx = (f(x[0] + h, x[1], *args) - f(x[0] - h, x[1], *args))/(2 * h)
 	dfdy = (f(x[0], x[1] + h, *args) - f(x[0], x[1] - h, *args))/(2 * h)
@@ -104,10 +104,12 @@ def hessian(f, x, *args):
 	hess = np.zeros((2,2))
 	h = 10**(-5)
 	x = (x[0,0], x[1,0]) # converts input np.array to a tuple to simplify code
-	dfdxx = (f(x[0] + h, x[1], *args) - 2 * f(x[0], x[1], *args) + f(x[0] - h, x[1], *args)) / (h**2)
-	dfdyy = (f(x[0], x[1] + h, *args) - 2 * f(x[0], x[1], *args) + f(x[0], x[1] - h, *args)) / (h**2)
+	dfdxx = (f(x[0] + h, x[1], *args) - 2 * f(x[0], x[1], *args) + 
+            f(x[0] - h, x[1], *args)) / (h**2)
+	dfdyy = (f(x[0], x[1] + h, *args) - 2 * f(x[0], x[1], *args) + 
+            f(x[0], x[1] - h, *args)) / (h**2)
 	dfdxy = (f(x[0] + h, x[1] + h, *args) - f(x[0] + h, x[1] - h, *args) - 
-			  f(x[0] - h, x[1] + h, *args) + f(x[0] - h, x[1] - h, *args)) / (4 * h**2) 
+			   f(x[0] - h, x[1] + h, *args) + f(x[0] - h, x[1] - h, *args)) / (4 * h**2) 
 	
 	hess[0,0] = dfdxx
 	hess[0,1] = dfdxy
@@ -135,9 +137,9 @@ def grad_min(f, x, a, *args):
     grad = grad_cds(f, x, *args) # calculate gradient
     x_update = x-a*grad # calcuate x_(n+1)
     x_hist.append((x[0,0], x[1,0])) # converts back to tuple for more readable form
-    print((x[0,0], x[1,0]))
+    #print((x[0,0], x[1,0]))
     x_hist.append((x_update[0,0], x_update[1,0]))
-    print((x_update[0,0], x_update[1,0]))
+    #print((x_update[0,0], x_update[1,0]))
     conv = convergence(f, x, x_update, *args) # determine convergence criteria
     x = x_update
 	
@@ -145,7 +147,7 @@ def grad_min(f, x, a, *args):
         grad = grad_cds(f, x, *args)
         x_update = x-a*grad
         x_hist.append((x_update[0,0], x[1,0])) #convert back to tuple for more readable form
-        print((x_update[0,0], x_update[1,0]))
+        #print((x_update[0,0], x_update[1,0]))
         conv = convergence(f, x, x_update, *args) # determine convergence criteria
         x = x_update
 
@@ -160,7 +162,6 @@ def newton_min(f, x, *args):
     Args: 
         f: function to be minimized. 
         x: starting point in tuple form (x,y).
-        a: step size. 
         *args: function arguments.
     Returns: 
         x_hist: record of points in tuple form (x,y). 
@@ -233,13 +234,17 @@ if __name__ == "__main__":
 	contour = ax1.contour(X, Y, Z)
 	#contour = ax1.contourf(X, Y, Z, cmap=cm.viridis)
 	fig1.colorbar(contour)
-	ax1.plot([a[0] for a in x_hist1], [a[1] for a in x_hist1], color='green', linestyle='--', marker='.', label='Gradient Method')
-	ax1.plot([a[0] for a in x_hist2], [a[1] for a in x_hist2], color='red', linestyle='--', marker='.', label='Newton\'s Method')
+	ax1.plot([a[0] for a in x_hist1], [a[1] for a in x_hist1], color='green', 
+             linestyle='--', marker='.', label='Gradient Method')
+	ax1.plot([a[0] for a in x_hist2], [a[1] for a in x_hist2], color='red', 
+             linestyle='--', marker='.', label='Newton\'s Method')
 	ax1.grid()
 	ax1.legend(loc='best')
 	fig2, ax2 = plt.subplots()
-	ax2.plot(range(len(x_hist1)), [a[0] for a in x_hist1], color='green', linestyle='-', marker='.', label='Gradient Method')
-	ax2.plot(range(len(x_hist2)), [a[0] for a in x_hist2], color='red', linestyle='-', marker='.', label='Newton\'s Method')
+	ax2.plot(range(len(x_hist1)), [a[0] for a in x_hist1], color='green', 
+            linestyle='-', marker='.', label='Gradient Method')
+	ax2.plot(range(len(x_hist2)), [a[0] for a in x_hist2], color='red', 
+            linestyle='-', marker='.', label='Newton\'s Method')
 	ax2.grid()
 	ax2.legend(loc='best')
 	plt.show()

@@ -68,12 +68,12 @@ def nll_2d(tau, a, lifetime, uncertainty):
     '''
     
     prob_list = []
-        
+    print(a)
     for (t,s) in zip(lifetime, uncertainty):
         prob = a * fit(tau, t, s) + (1 - a) * fit_back(t, s)
-        if (prob < 0):
-            print('Error, negative argument for log likelihood')
-            break 
+#        if (prob < 0):
+#            print('Error, negative argument for log likelihood')
+#            break 
             
         prob_list.append(np.log(prob))
         
