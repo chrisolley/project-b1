@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import matplotlib.pyplot as plt
 import numpy as np
+from helper import newton_raphson
 
 
 def min(f, x, *args):
@@ -41,45 +42,50 @@ def quad_poly(x, data):
     return f
 
 
-def sd_1(f, min_val, *args):
+def sd_1(f, f_min, x, *args):
     '''
     sd_1: Computes the standard deviation based on a given NLL function and its
         minimum, by varying the NLL function by 1/2.
     Args:
         f: NLL function.
-        min_val: Minimum.
+        min_val: Minimum coordinate of function.
     Returns:
         (s_upper, s_lower)
     '''
     # choose a step size relative to the scale of the function around the min
-    step_size = 10**(-4) * min_val[0]
 
-    # calculate upper sd
-    print("\n")
-    n = 1
-    diff = f(min_val[0] + n * step_size, *args) - min_val[1]
-
-    while (diff < 0.5):
-        print("\r Upper sd loop: {}".format(n), end="")
-        n += 1
-        diff = f(min_val[0] + n * step_size, *args) - min_val[1]
-
-    s_upper = n * step_size
-
-    # calculate lower sd
-    print("\n")
-    n = 1
-    diff = f(min_val[0] - n * step_size, *args) - min_val[1]
-
-    while (diff < 0.5): 
-        print("\r Lower sd loop: {}".format(n), end="")
-        n += 1
-        diff = f(min_val[0] - n * step_size, *args) - min_val[1]
-
-    s_lower = n * step_size
-    print ("\n")
-
-    return s_lower, s_upper
+#    # calculate upper sd
+#    print("\n")
+#    n = 1
+#    diff = f(min_val[0] + n * step_size, *args) - min_val[1]
+#
+#    while (diff < 0.5):
+#        print("\r Upper sd loop: {}".format(n), end="")
+#        n += 1
+#        diff = f(min_val[0] + n * step_size, *args) - min_val[1]
+#
+#    s_upper = n * step_size
+#
+#    # calculate lower sd
+#    print("\n")
+#    n = 1
+#    diff = f(min_val[0] - n * step_size, *args) - min_val[1]
+#
+#    while (diff < 0.5): 
+#        print("\r Lower sd loop: {}".format(n), end="")
+#        n += 1
+#        diff = f(min_val[0] - n * step_size, *args) - min_val[1]
+#
+#    s_lower = n * step_size
+#    print ("\n")
+    epsilon = 10**(-4)
+    
+    def g(x, *args): 
+        return f(x, *args) - (f_min + 0.5)
+    
+    solution = newton_raphson(g, x, epsilon, *args)
+    
+    return solution
 
 
 def sd_2(p):

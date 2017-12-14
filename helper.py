@@ -1,6 +1,20 @@
 # -*- coding: utf-8 -*-
 import numpy as np
+from matplotlib import rc
+from pylab import rcParams
 
+def figsize(scale):
+    fig_width_pt = 469.755                         
+    inches_per_pt = 1.0/72.27 
+    figwidth = fig_width_pt*inches_per_pt*scale
+    figheight = figwidth
+    return figwidth, figheight
+
+def latexfigure(scale):
+    rc('font', **{'family':'sans-serif','sans-serif':['Computer Modern Sans serif'], 'size':9}) #
+    rc('text', usetex=True)
+    rcParams['figure.figsize'] = figsize(scale)[0], figsize(scale)[1]
+    
 def dot(a,b):
 
 	'''Multiplies two matrices if their dimensions are appropriate '''
@@ -127,3 +141,119 @@ def lu(a,b):
 		print('Solution error.')
 
 	return l,u,x,det
+
+def grad(f, x, *args):
+	'''
+	grad: Finds the gradient of a 1d function using the central difference 
+		  scheme (CDS).
+	Args: 
+		f: function to take gradient of. 
+		x: point to evaluate at.
+		*args: function arguments. 
+	Returns: 
+		dfdx: gradient.
+		
+	'''
+	h = 10**(-7)
+	dfdx = (f(x + h, *args) - f(x - h, *args)) / (2 * h)
+	
+	return dfdx
+
+
+def newton_raphson(f, x, epsilon, *args): 
+    '''
+    newton_raphson: 1d root finder
+    Args:
+        f: function to find root.
+        x: initial guess.
+        epsilon: desired accuracy of solution.
+        *args: function arguments. 
+    Returns: 
+        root: root of function.
+    '''
+    x_update = x - (f(x, *args) / grad(f, x, *args))
+    conv = abs((x_update-x)/x_update)
+    x = x_update
+    i = 0
+    while (conv > epsilon):
+        if (i<20): 
+            x_update = x - (f(x, *args) / grad(f, x, *args))
+            conv = abs((x_update-x)/x_update)
+            x = x_update
+            i+=1
+        else:
+            x = float('nan')
+            break
+    root = x
+
+    return root
+
+def convergence(f, x_old, x_new, *args):
+	'''
+	convergence: Determines convergence criteria for two consecutive points.
+	Args:
+		f: function.
+		x_old: previous point in np array form. 
+		x_new: next point in np array form. 
+		*args: function arguments.
+	Returns: 
+		conv: convergence criteria.
+	'''
+	x_old = (x_old[0,0], x_old[1,0])
+	x_new = (x_new[0,0], x_new[1,0])
+	conv = (f(x_new[0], x_new[1], *args) - 
+			 f(x_old[0], x_old[1], *args)) / f(x_old[0], x_old[1], *args)
+	
+	return abs(conv)
+
+
+def grad_cds(f, x, *args):
+	'''
+	grad_cds: Finds the gradient of a 2d function using the central difference 
+		  scheme (CDS).
+	Args: 
+		f: function to take gradient of. 
+		x: point to evaluate at as an (2,1) np.array.
+		*args: function arguments. 
+	Returns: 
+		(dfdx, dfdy): gradient in tuple form.
+		
+	'''
+	grad = np.zeros((2,1)) # empty array for gradient
+	h = 10**(-7)
+	x = (x[0,0], x[1,0]) # converts input np.array to a tuple to simplify code
+	dfdx = (f(x[0] + h, x[1], *args) - f(x[0] - h, x[1], *args)) / (2 * h)
+	dfdy = (f(x[0], x[1] + h, *args) - f(x[0], x[1] - h, *args)) / (2 * h)
+	
+	grad[0,0] = dfdx
+	grad[1,0] = dfdy
+	
+	return grad
+
+def hessian(f, x, *args):
+	'''
+	hessian: Finds the hessian of a 2d function using a finite difference scheme. 
+	Args: 
+		f: function to take gradient of. 
+		x: point to evaluate at. 
+		*args: function arguments.	
+	Returns: 
+		hess: hessian in np.array form. 
+	'''
+	
+	hess = np.zeros((2,2))
+	h = 10**(-5)
+	x = (x[0,0], x[1,0]) # converts input np.array to a tuple to simplify code
+	dfdxx = (f(x[0] + h, x[1], *args) - 2 * f(x[0], x[1], *args) + 
+            f(x[0] - h, x[1], *args)) / (h**2)
+	dfdyy = (f(x[0], x[1] + h, *args) - 2 * f(x[0], x[1], *args) + 
+            f(x[0], x[1] - h, *args)) / (h**2)
+	dfdxy = (f(x[0] + h, x[1] + h, *args) - f(x[0] + h, x[1] - h, *args) - 
+			   f(x[0] - h, x[1] + h, *args) + f(x[0] - h, x[1] - h, *args)) / (4 * h**2) 
+	
+	hess[0,0] = dfdxx
+	hess[0,1] = dfdxy
+	hess[1,0] = dfdxy
+	hess[1,1] = dfdyy
+   
+	return hess

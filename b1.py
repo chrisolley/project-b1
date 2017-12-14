@@ -2,9 +2,6 @@
 # !python3
 import numpy as np
 import math
-
-#plt.rc('text', usetex=True)
-#plt.rc('font', family='sans serif')
  
 def fit(tau, t, s):
     '''
