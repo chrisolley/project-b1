@@ -3,9 +3,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import cm
 from mpl_toolkits.mplot3d import Axes3D
-from tqdm import tqdm
 from b1 import nll_2d
-from min_2d import grad_min, newton_min, grad_cds, grad_fds
+from min_2d import grad_min, newton_min, sd
 
 f = open('lifetime.txt')  # measured lifetimes and uncertainty data
 lifetime = []
@@ -37,15 +36,37 @@ a = np.linspace(0.94, 1., grid_points)
 nll_matrix = np.zeros((grid_points, grid_points)) # initialise array for nll function plotting
 #gradient_matrix_x = np.zeros((grid_points, grid_points))
 #gradient_matrix_y = np.zeros((grid_points, grid_points))
+x_min = sol1[2]
+f_min = sol2[3]
+#print(sd(nll_2d, f_min, x_min[0]-0.01, x_min[1], lifetime, uncertainty))
 
-for i, t in enumerate(tqdm(tau, desc="Tau loop")):# tau loop {}'.format(i)):
-    for j, b in enumerate(tqdm(a, desc="a loop", leave=False)):# a loop {}'.format(j)):
-    #tqdm(tau, total=len(tau), desc='NLL array filling...'):
+a_range = np.arange(x_min[1] - 0.02, x_min[1] + 0.02, 10**(-3))
+tau_contour1 = []
+tau_contour2 = []
+
+for i in a_range:
+    tau_contour1.append(sd(nll_2d, f_min, x_min[0]-0.01, i, lifetime, uncertainty))
+    tau_contour2.append(sd(nll_2d, f_min, x_min[0]+0.01, i, lifetime, uncertainty))
+
+#fig, ax = plt.subplots()
+#ax.plot(tau, [nll_2d(t, x_min[1]+0.01, lifetime, uncertainty)-(f_min+0.5) for t in tau])
+#solution = newton_raphson(nll_2d, x_min[0]+0.01, 10**(-3), 
+
+for i, t in enumerate(tau):
+    print('\n')
+    print('\r Filling 2D NLL function array (tau loop): {}/{}'.format(i, len(tau)), end="")
+    print('\n')
+    for j, b in enumerate(a):
+        print('\r Filling 2D NLL function array (a loop): {}/{}'.format(j, len(a)), end="")
+        #tqdm(tau, total=len(tau), desc='NLL array filling...'):
         nll_matrix[j, i] = nll_2d(tau=t, a=b, lifetime=lifetime, uncertainty=uncertainty)
         #x = np.asarray((t,b)).reshape((2,1))
         #gradient_matrix_x[j, i] = grad_cds(nll_2d, x, lifetime, uncertainty)[0,0]
         #gradient_matrix_y[j, i] = grad_cds(nll_2d, x, lifetime, uncertainty)[1,0]
-        
+
+#tau_contour, a_contour = sd(nll_2d, sol1[2], sol1[3], lifetime, uncertainty)
+
+
 #gradient_np = np.gradient(nll_matrix)
 #T, A = np.meshgrid(tau,a)
 #
@@ -87,7 +108,7 @@ ax1.plot([a[0] for a in x_hist2], [a[1] for a in x_hist2], color='red',
 
 fig1.colorbar(contourf)
 ax1.grid()
-ax1.set_ylabel("a")
+ax1.set_ylabel("a") 
 ax1.set_xlabel("tau")
 ax1.legend(loc='best')
 
@@ -102,6 +123,16 @@ ax3 = fig3.add_subplot(111, projection='3d')
 ax3.plot_surface(T, A, nll_matrix)
 ax3.plot([a[0] for a in x_hist1], [a[1] for a in x_hist1], [a for a in f_hist1])    
 ax3.plot([a[0] for a in x_hist2], [a[1] for a in x_hist2], [a for a in f_hist2])
+
+fig4, ax4 = plt.subplots()
+ax4.plot(tau_contour1, a_range, color='blue', linestyle=' ', marker='.')
+ax4.plot(tau_contour2, a_range, color='blue', linestyle=' ', marker='.')
+ax4.plot(x_min[0], x_min[1], color='red', linestyle=' ', marker='.')
+ax4.grid()
+ax4.set_ylabel("a") 
+ax4.set_xlabel("tau")
+
+
 plt.show()
 
 print('Gradient Method number of steps: {}'.format(len(x_hist1)))

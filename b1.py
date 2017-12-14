@@ -2,9 +2,7 @@
 # !python3
 import numpy as np
 import math
-import random
- 
- 
+
 #plt.rc('text', usetex=True)
 #plt.rc('font', family='sans serif')
  
@@ -69,13 +67,10 @@ def nll_2d(tau, a, lifetime, uncertainty):
     
     prob_list = []
     for (t,s) in zip(lifetime, uncertainty):
-        prob = a * fit(tau, t, s) + (1 - a) * fit_back(t, s)
-#        if (prob < 0):
-#            print('Error, negative argument for log likelihood')
-#            break 
-            
+        prob = a * fit(tau, t, s) + (1 - a) * fit_back(t, s)            
         prob_list.append(np.log(prob))
         
     nll = -sum(prob_list)
     
     return nll
+

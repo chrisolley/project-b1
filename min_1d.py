@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import matplotlib.pyplot as plt
 import numpy as np
-from tqdm import tqdm
 
 
 def min(f, x, *args):
@@ -52,8 +51,8 @@ def sd_1(f, min_val, *args):
     Returns:
         (s_upper, s_lower)
     '''
-    # choose a step size relative to the\scale of the function around the min
-    step_size = 10**(-3) * min_val[0]
+    # choose a step size relative to the scale of the function around the min
+    step_size = 10**(-4) * min_val[0]
 
     # calculate upper sd
     print("\n")
@@ -61,7 +60,7 @@ def sd_1(f, min_val, *args):
     diff = f(min_val[0] + n * step_size, *args) - min_val[1]
 
     while (diff < 0.5):
-        print("\r Upper sd loop {}".format(n), end="")
+        print("\r Upper sd loop: {}".format(n), end="")
         n += 1
         diff = f(min_val[0] + n * step_size, *args) - min_val[1]
 
@@ -73,7 +72,7 @@ def sd_1(f, min_val, *args):
     diff = f(min_val[0] - n * step_size, *args) - min_val[1]
 
     while (diff < 0.5): 
-        print("\r Lower sd loop {}".format(n), end="")
+        print("\r Lower sd loop: {}".format(n), end="")
         n += 1
         diff = f(min_val[0] - n * step_size, *args) - min_val[1]
 
@@ -128,7 +127,8 @@ def para_min(f, start_points, epsilon, *args):
     i = 1
     print ("\n")
     while (conv > epsilon):
-        print("\r Parabolic minimisation loop {}".format(i), end="") 
+        print("\r Parabolic minimisation loop: {}".format(i), end="") 
+        
         x_update = min(f, [elem[0] for elem in points], *args)
         point_update = (x_update, f(x_update, *args))
         points.append(point_update)
@@ -140,11 +140,11 @@ def para_min(f, start_points, epsilon, *args):
         i += 1
     
     min_val = points_hist[-1]
+    #print ("\n")
+    #s_lower1, s_upper1 = sd_1(f, min_val, *args)
+    #s_2 = sd_2(points)
     
-    s_lower1, s_upper1 = sd_1(f, min_val, *args)
-    s_2 = sd_2(points)
-    
-    return min_val, points_hist, points_initial, s_lower1, s_upper1, s_2, points
+    return min_val, points_hist, points_initial, points
 
 
 

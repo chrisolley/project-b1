@@ -9,8 +9,8 @@ def convergence(f, x_old, x_new, *args):
 	convergence: Determines convergence criteria for two consecutive points.
 	Args:
 		f: function.
-		x_old: previous point. 
-		x_new: next point. 
+		x_old: previous point in np array form. 
+		x_new: next point in np array form. 
 		*args: function arguments.
 	Returns: 
 		conv: convergence criteria.
@@ -90,6 +90,24 @@ def grad_cds(f, x, *args):
 	
 	return grad
 
+
+def grad_cds_1d(f, x, *args):
+	'''
+	grad_cds: Finds the gradient of a 1d function using the central difference 
+		  scheme (CDS).
+	Args: 
+		f: function to take gradient of. 
+		x: point to evaluate at.
+		*args: function arguments. 
+	Returns: 
+		dfdx: gradient.
+		
+	'''
+	h = 10**(-7)
+	dfdx = (f(x + h, *args) - f(x - h, *args)) / (2 * h)
+	
+	return dfdx
+
 def hessian(f, x, *args):
 	'''
 	hessian: Finds the hessian of a 2d function using a finite difference scheme. 
@@ -136,9 +154,9 @@ def grad_min(f, x, a, *args):
     f_hist = []
     x = np.asarray(x).reshape((2,1)) # converts tuple to array so works with helper functions
     grad = grad_cds(f, x, *args) # calculate gradient
-    print('x: ', x, 'a: ', a, 'grad: ', grad)
+    #print('x: ', x, 'a: ', a, 'grad: ', grad)
     x_update = x - a * grad # calcuate x_(n+1)
-    print('x_update: ', x_update)
+    #print('x_update: ', x_update)
     x_hist.append((x[0,0], x[1,0])) # converts back to tuple for more readable form
     #print((x[0,0], x[1,0]))    
     f_hist.append(f(x[0,0], x[1,0], *args))
@@ -150,9 +168,9 @@ def grad_min(f, x, a, *args):
 	
     while (conv > 10**(-6)):
         grad = grad_cds(f, x, *args)
-        print('x: ', x, 'a: ', a, 'grad: ', grad)
+        #print('x: ', x, 'a: ', a, 'grad: ', grad)
         x_update = x - a * grad
-        print('x_update: ', x_update)
+        #print('x_update: ', x_update)
         x_hist.append((x_update[0,0], x[1,0])) #convert back to tuple for more readable form
         f_hist.append(f(x_update[0,0], x_update[1,0], *args))
         #print((x_update[0,0], x_update[1,0]))
@@ -189,7 +207,7 @@ def newton_min(f, x, *args):
     f_hist.append(f(x[0,0], x[1,0], *args))
     d = dot(inv_hess, grad)
     x_update = x - d
-    print(x_update)
+    #print(x_update)
     x_hist.append((x_update[0,0], x_update[1,0]))
     f_hist.append(f(x_update[0,0], x_update[1,0], *args))
     conv = convergence(f, x, x_update, *args) # determine convergence criteria
@@ -201,7 +219,7 @@ def newton_min(f, x, *args):
         inv_hess = lu(hess, np.identity(2))[2]
         d = dot(inv_hess,grad)
         x_update = x - d
-        print(x_update)
+        #print(x_update)
         x_hist.append((x_update[0,0], x_update[1,0]))
         f_hist.append(f(x_update[0,0], x_update[1,0], *args))
         conv = convergence(f, x, x_update, *args) # determine convergence criteria
@@ -211,7 +229,45 @@ def newton_min(f, x, *args):
     f_min = f(x_min[0], x_min[1], *args)
 
     return x_hist, f_hist, x_min, f_min
-	
+
+def newton_raphson(f, x, epsilon, *args): 
+    '''
+    newton_raphson: 1d root finder
+    Args:
+        f: function to find root.
+        x: initial guess.
+        epsilon: desired accuracy of solution.
+        *args: function arguments. 
+    Returns: 
+        root: root of function.
+    '''
+    x_update = x - (f(x, *args) / grad_cds_1d(f, x, *args))
+    conv = abs((x_update-x)/x_update)
+    x = x_update
+    i = 0
+    while (conv > epsilon):
+        if (i<20): 
+            x_update = x - (f(x, *args) / grad_cds_1d(f, x, *args))
+            conv = abs((x_update-x)/x_update)
+            x = x_update
+            i+=1
+        else:
+            x = float('nan')
+            break
+    root = x
+    print(root)
+    return root
+
+
+def sd(f, f_min, x, *args):
+    
+    epsilon = 10**(-4)
+    
+    def g(x, *args): 
+        return f(x, *args) - (f_min + 0.5)
+
+    solution = newton_raphson(g, x, epsilon, *args)
+    return solution
 
 def test(x, y, a, b):
 	
@@ -259,6 +315,7 @@ if __name__ == "__main__":
 	
 	print('Gradient Method number of steps: {}'.format(len(x_hist1)))
 	print('Newton\'s Method number of steps: {}'.format(len(x_hist2)))
+
 
 #   x = (10,10)
 #   x = np.asarray(x).reshape((2,1))
