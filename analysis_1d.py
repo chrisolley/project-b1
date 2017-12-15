@@ -31,18 +31,19 @@ nll_minimisation = para_min(nll, (0.1, 0.3, 1.0), 10**(-5), lifetime, uncertaint
 min_val, points_hist, points_initial, points = nll_minimisation
 
 #s_lower1, s_upper1 = sd_1(nll, min_val, lifetime, uncertainty)
-s_lower1 = sd_1(nll, min_val[1], min_val[0] - 0.01, lifetime, uncertainty)
-s_upper1 = sd_1(nll, min_val[1], min_val[0] + 0.01, lifetime, uncertainty)
+#s_lower1 = sd_1(nll, min_val[1], min_val[0] - 0.01, lifetime, uncertainty)
+#s_upper1 = sd_1(nll, min_val[1], min_val[0] + 0.01, lifetime, uncertainty)
+s_lower1, s_upper1 = sd_1(nll, min_val, lifetime, uncertainty)
 s_2 = sd_2(points)
 
 # create range for tau estimate standard deviation plotting
-tau_sd = np.linspace(s_lower1 - 0.005, s_upper1 + 0.005, 100)
+tau_sd = np.linspace(min_val[0] - s_lower1 - 0.005, min_val[0] + s_upper1 + 0.005, 100)
 
 # display results of minimisation
 print("\n")
 print("NLL function is minimised (NLL = {}) for: ".format(min_val[1]))
 print("tau = {}, ".format(min_val[0]))
-print("s.d. = + {} - {} (NLL Variation Method), ".format(s_upper1 - min_val[0], min_val[0] - s_lower1))
+print("s.d. = + {} - {} (NLL Variation Method), ".format(s_upper1, s_lower1))
 print("s.d. = +/- {} (Curvature Method).".format(s_2))
 
 # plot histogram of data overlaid with fit functions with different parameters
@@ -100,7 +101,7 @@ plt.tight_layout()
 fig4, ax4 = plt.subplots()
 ax4.plot(tau_sd, [nll(a, lifetime, uncertainty) for a in tau_sd], color='black')
 ax4.plot(min_val[0], min_val[1], color='red', linestyle='', marker='o', markeredgecolor='black')
-ax4.plot([s_upper1, s_lower1], 
+ax4.plot([min_val[0] + s_upper1, min_val[0] - s_lower1], 
          [min_val[1] + 0.5, min_val[1] + 0.5] , color='blue', 
          linestyle='', marker='o', markeredgecolor='black')
 ax4.plot([elem[0] for elem in points],
@@ -109,7 +110,7 @@ ax4.plot([elem[0] for elem in points],
 y = [quad_poly(a, points) for a in tau_sd]
 ax4.plot(tau_sd, y, linestyle='--')
 
-ax4.set_xlim(s_lower1 - 0.005 , s_upper1 + 0.005)
+ax4.set_xlim(min_val[0] - s_lower1 - 0.005 , min_val[0] + s_upper1 + 0.005)
 ax4.set_ylim(min_val[1] - 0.5, min_val[1] + 1.5)
 ax4.set_ylabel("NLL")
 ax4.set_xlabel(r"$\tau \mathrm{(ps)}$")
