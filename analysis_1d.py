@@ -8,7 +8,7 @@ from helper import latexfigure
  
 
 # latex file figures- comment out this line and above if just plotting
-latexfigure(0.5)
+latexfigure(0.7)
 
 N = 10000 # number of data points
 lifetime, uncertainty = read_data(N) # read data from lifetime.txt 
@@ -48,29 +48,37 @@ print("s.d. = +/- {} (Curvature Method).".format(s_2))
 # plot histogram of data overlaid with fit functions with different parameters
 print("Plotting...")
 
+fig, ax = plt.subplots()
+ax.hist(lifetime, bins=int(np.sqrt(N)), edgecolor='black')
+ax.set_xlim(-3., 3.)
+ax.set_xlabel(r"$t \mathrm{(ps)}$")
+ax.set_ylabel("Frequency")
+ax.grid()
+plt.tight_layout()
+
 # plotting different values of tau
 fig1, ax1 = plt.subplots()
 ax1.hist(lifetime, bins=int(np.sqrt(N)), normed=True, edgecolor='black')
-ax1.plot(t, [fit(0.4, a, 0.3) for a in t]) 
-ax1.plot(t, [fit(0.5, a, 0.3) for a in t])
-ax1.plot(t, [fit(0.3, a, 0.3) for a in t])
-ax1.plot(t, [fit(0.2, a, 0.3) for a in t])
+ax1.plot(t, [fit(0.4, a, 0.3) for a in t]) # tau = 0.4
+ax1.plot(t, [fit(0.5, a, 0.3) for a in t]) # tau = 0.5
+ax1.plot(t, [fit(0.3, a, 0.3) for a in t]) # tau = 0.3
+ax1.plot(t, [fit(0.2, a, 0.3) for a in t]) # tau = 0.2
 ax1.set_xlim(-3., 3.)
-ax1.set_xlabel(r"\tau")
-ax1.set_ylabel(r"\mathcal{P}")
+ax1.set_xlabel(r"$t \mathrm{(ps)}$")
+ax1.set_ylabel(r"$f_{sig}^m$")  
 ax1.grid()
 plt.tight_layout()
 
 # plotting different values of sigma
 fig2, ax2 = plt.subplots()
 ax2.hist(lifetime, bins=int(np.sqrt(N)), normed=True, edgecolor='black')
-ax2.plot(t, [fit(0.4, a, 0.3) for a in t])
-ax2.plot(t, [fit(0.4, a, 0.2) for a in t])
-ax2.plot(t, [fit(0.4, a, 0.4) for a in t])
-ax2.plot(t, [fit(0.4, a, 0.1) for a in t])
+ax2.plot(t, [fit(0.4, a, 0.3) for a in t]) # sigma = 0.3
+ax2.plot(t, [fit(0.4, a, 0.2) for a in t]) # sigma = 0.2
+ax2.plot(t, [fit(0.4, a, 0.4) for a in t]) # sigma = 0.4
+ax2.plot(t, [fit(0.4, a, 0.1) for a in t]) # sigma = 0.1
 ax2.set_xlim(-3., 3.)
-ax2.set_xlabel(r"\tau")
-ax2.set_ylabel(r"\mathcal{P}")
+ax2.set_xlabel(r"$t \mathrm{(ps)}$")
+ax2.set_ylabel(r"$f_{sig}^m$")
 ax2.grid()
 plt.tight_layout()
 
@@ -84,7 +92,7 @@ ax3.plot([elem[0] for elem in points_initial],
          [elem[1] for elem in points_initial],
          color='green', linestyle='', marker='.')
 ax3.set_ylabel("NLL")
-ax3.set_xlabel(r"\tau")
+ax3.set_xlabel(r"$\tau \mathrm{(ps)}$")
 ax3.grid()
 plt.tight_layout()
 
@@ -104,7 +112,7 @@ ax4.plot(tau_sd, y, linestyle='--')
 ax4.set_xlim(s_lower1 - 0.005 , s_upper1 + 0.005)
 ax4.set_ylim(min_val[1] - 0.5, min_val[1] + 1.5)
 ax4.set_ylabel("NLL")
-ax4.set_xlabel(r"\tau")
+ax4.set_xlabel(r"$\tau \mathrm{(ps)}$")
 ax4.grid()
 
 plt.tight_layout()
