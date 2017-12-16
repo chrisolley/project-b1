@@ -40,7 +40,7 @@ if __name__ == "__main__":
     data_points_list_log = [np.log(i) for i in data_points_list]
     #sd_array = sd_analysis(data_points_list)
     sd_1_lower_array = []
-    sd_1_upper_array = []
+    sd_1_upper_array = []   
     sd_2_array = []
     
     for i, a in enumerate(data_points_list):
@@ -53,9 +53,22 @@ if __name__ == "__main__":
     slope1, intercept1, r_value1, p_value1, std_err1 = stats.linregress(data_points_list_log, sd_2_array)
     slope2, intercept2, r_value2, p_value2, std_err2 = stats.linregress(data_points_list_log, sd_1_lower_array)
     slope3, intercept3, r_value3, p_value3, std_err3 = stats.linregress(data_points_list_log, sd_1_upper_array)
-    
+    print("\n")
     print("Slopes: {}, {}, {}.".format(slope1, slope2, slope3))
     print("Intercepts: {}, {}, {}.".format(intercept1, intercept2, intercept3))
+    
+    slope_av = sum((slope1, slope2, slope3))/3
+    intercept_av = sum((intercept1, intercept2, intercept3))/3
+    std_av = sum((std_err1, std_err2, std_err3))/3
+    rval_av = sum((r_value1, r_value2, r_value3))/3
+    
+    print("Average slope: {}.".format(slope_av))
+    print("Average intercept: {}.".format(intercept_av))
+    print("Average slope std: {}".format(std_av))
+    print("Average r-value: {}".format(rval_av))
+    print("For sigma=AN^alpha: ")
+    print("A= {}".format(np.exp(intercept_av)))
+    print("alpha= {} +- {}".format(slope_av, std_av))   
     
     fig, ax = plt.subplots()
     ax.plot(data_points_list_log, sd_2_array, color='green', 
@@ -65,8 +78,8 @@ if __name__ == "__main__":
     ax.plot(data_points_list_log, sd_1_upper_array, color='red', 
             linestyle='', marker='+', markersize=4)
 
-    ax.plot(data_points_list_log, [-0.5 * i for i in data_points_list_log],
-            linestyle='--', color = "blue")
+    ax.plot(data_points_list_log, [slope_av * i + intercept_av for i in data_points_list_log],
+            linestyle=':', color = "blue")
     #ax.set_yscale('log')
     #ax.set_xscale('log')
     ax.grid()
