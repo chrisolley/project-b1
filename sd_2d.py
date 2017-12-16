@@ -7,7 +7,7 @@ from min_2d import grad_min, newton_min, sd
 from helper import latexfigure
 
 # latex file figures
-latexfigure(0.5)
+latexfigure(0.7)
 
 N = 10000 # number of data points
 lifetime, uncertainty = read_data(N) # read data from lifetime.txt 
@@ -24,23 +24,38 @@ x_hist_newton, f_hist_newton, x_min_newton, f_min_newton = sol_newton
 # set up grids for plotting
 
 # 2d nll function grids
-a_range = np.linspace(x_min_newton[1] - 0.02, x_min_newton[1] + 0.02, 20)
-tau_contour1 = []
-tau_contour2 = []
+a_range = np.linspace(x_min_newton[1] - 0.01, x_min_newton[1] + 0.01, 45)
+sd_contour1 = []
+sd_contour2 = []
 
 for i, b in enumerate(a_range):
     print('\r 2D S.D. grid row: {}/{}'.format(i + 1, len(a_range)), end="")
-    tau_contour1.append(sd(nll_2d, f_min_newton, x_min_newton[0]-0.01, 
-                           b, lifetime, uncertainty))
-    tau_contour2.append(sd(nll_2d, f_min_newton, x_min_newton[0]+0.01, 
-                           b, lifetime, uncertainty))
+    sd_contour1.append((sd(nll_2d, f_min_newton, x_min_newton[0]-0.01, 
+                           b, lifetime, uncertainty), b))
+    sd_contour2.append((sd(nll_2d, f_min_newton, x_min_newton[0]+0.01, 
+                           b, lifetime, uncertainty), b))
 
-tau_contour = np.concatenate((tau_contour1, tau_contour2))
-tau_sd_upper = max(tau_contour)
-tau_sd_lower = min(tau_contour)
+sd_contour = []
+
+for i in sd_contour1:
+    if (np.isnan(i[0]) == False): 
+        sd_contour.append((i[0], i[1]))
+
+for i in sd_contour2:
+    if (np.isnan(i[0]) == False): 
+        sd_contour.append((i[0], i[1]))
+
+tau_sd_upper = abs(max([a[0] for a in sd_contour]) - x_min_newton[0])
+tau_sd_lower = abs(min([a[0] for a in sd_contour]) - x_min_newton[0])
+a_sd_upper = abs(max([a[1] for a in sd_contour]) - x_min_newton[1])
+a_sd_lower = abs(min([a[1] for a in sd_contour]) - x_min_newton[1])
+
+print('tau uncertainty = + {} - {}'.format(tau_sd_upper, tau_sd_lower))
+print('a uncertainty = + {} - {}'.format(a_sd_upper, a_sd_lower))
+
 fig, ax = plt.subplots()
-ax.plot(tau_contour1, a_range, color='blue', linestyle=' ', marker='.')
-ax.plot(tau_contour2, a_range, color='blue', linestyle=' ', marker='.')
+ax.plot([a[0] for a in sd_contour], [b[1] for b in sd_contour], 
+        color='blue', linestyle=' ', marker='.')
 ax.plot(x_min_newton[0], x_min_newton[1], color='red', linestyle=' ', marker='.')
 ax.grid()
 ax.set_ylabel(r"$a$") 

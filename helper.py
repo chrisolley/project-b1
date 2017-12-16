@@ -176,7 +176,7 @@ def newton_raphson(f, x, epsilon, *args):
     x = x_update
     i = 0
     while (conv > epsilon):
-        if (i<20): 
+        if (i<30): 
             x_update = x - (f(x, *args) / grad(f, x, *args))
             conv = abs((x_update-x)/x_update)
             x = x_update
@@ -185,7 +185,7 @@ def newton_raphson(f, x, epsilon, *args):
             x = float('nan')
             break
     root = x
-
+    
     return root
 
 def convergence(f, x_old, x_new, *args):
@@ -242,7 +242,7 @@ def hessian(f, x, *args):
 	'''
 	
 	hess = np.zeros((2,2))
-	h = 10**(-5)
+	h = 10**(-7)
 	x = (x[0,0], x[1,0]) # converts input np.array to a tuple to simplify code
 	dfdxx = (f(x[0] + h, x[1], *args) - 2 * f(x[0], x[1], *args) + 
             f(x[0] - h, x[1], *args)) / (h**2)

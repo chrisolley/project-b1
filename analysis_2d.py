@@ -15,7 +15,7 @@ N = 10000 # number of data points
 lifetime, uncertainty = read_data(N) # read data from lifetime.txt 
 
 # perform minimisation with newton's method and gradient method
-start_point = (.46, 0.95) # choose starting point near minimum
+start_point = (0.46, 0.95) # choose starting point near minimum
 sol_grad = grad_min(nll_2d, start_point, 10**(-5), lifetime, uncertainty)
 sol_newton = newton_min(nll_2d, start_point, lifetime, uncertainty)
 

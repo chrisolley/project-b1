@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib import cm
 from helper import dot, lu, newton_raphson, convergence, grad_cds, hessian
 
 def grad_min(f, x, a, *args):
