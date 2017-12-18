@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
-# !python3
+
 import numpy as np
 import math
  
-def fit(tau, t, s):
+def fit(t, tau, s):
     '''
     fit: Theoretical distribution for the measurements of decay lifetimes
     of subatomic particles. Convolution of an exponential distribution
@@ -24,8 +24,12 @@ def fit(tau, t, s):
 
 def fit_back(t, s):
     '''
-    fit_back:
-        
+    fit_back: Gaussian distribution of background signal, to be used in constructing the
+    2d nll function.
+    Args: 
+        t: measured lifetime produced by background signal.
+    Returns: 
+        f: value of distribution at point t.
     '''
     
     f = (s * np.sqrt(2 * np.pi))**(-1) * np.exp(-.5 * (t**2 / s**2))
@@ -49,7 +53,7 @@ def nll(tau, lifetime, uncertainty):
     prob_list = []
 
     for (t, s) in zip(lifetime, uncertainty):
-        prob = fit(tau, t, s)
+        prob = fit(t, tau, s)
         prob_list.append(np.log(prob))
 
     nll = -sum(prob_list)
@@ -58,13 +62,21 @@ def nll(tau, lifetime, uncertainty):
 
 def nll_2d(tau, a, lifetime, uncertainty):
     '''
-    nll_2d: 
-        
+    nll_2d: 2D Negative Log Likelihood, takes into account certain proportion
+    of background signal given by a. 
+    Args: 
+        tau: average lifetime.
+        a: proportion of true signal in total signal.
+        lifetime: list of lifetime measurements. 
+        uncertainty: list of uncertainties associated with lifetime measurements.
+    Returns: 
+        nll: 2d negative log likelihood for a given data set and specified 
+        parameters.
     '''
     
     prob_list = []
     for (t,s) in zip(lifetime, uncertainty):
-        prob = a * fit(tau, t, s) + (1 - a) * fit_back(t, s)            
+        prob = a * fit(t, tau, s) + (1 - a) * fit_back(t, s)            
         prob_list.append(np.log(prob))
         
     nll = -sum(prob_list)
