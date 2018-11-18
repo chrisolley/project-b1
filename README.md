@@ -1,2 +1,2 @@
 # project-b1
-Project B1 in Computational Physics course. Working with particle decay data to determine lifetimes using maximum likelihood.
+Computational Physics project. Working with particle decay data to determine lifetimes using maximum likelihood estimation, through the use of hand-coded multi dimensional minimisation algorithms.
